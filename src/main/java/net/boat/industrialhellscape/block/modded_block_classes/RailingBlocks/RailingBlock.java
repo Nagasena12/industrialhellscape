@@ -27,6 +27,9 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.Mirror;
+
 import javax.annotation.Nonnull;
 import java.util.List;
 
@@ -221,5 +224,45 @@ public class RailingBlock extends Block implements SimpleWaterloggedBlock{
     protected void createBlockStateDefinition (StateDefinition.Builder<Block, BlockState> builder) {
         super.createBlockStateDefinition(builder);
         builder.add(NORTH_FENCE, SOUTH_FENCE, EAST_FENCE, WEST_FENCE, WATERLOGGED);
+    }
+    // --------------------------------------------------------
+    // To grant proper position when rotating structures during worldgen
+    // --------------------------------------------------------
+
+    @Override
+    public BlockState rotate(BlockState state, Rotation rot) {
+        switch (rot) {
+            case CLOCKWISE_180:
+                return state.setValue(NORTH_FENCE, state.getValue(SOUTH_FENCE))
+                            .setValue(EAST_FENCE, state.getValue(WEST_FENCE))
+                            .setValue(SOUTH_FENCE, state.getValue(NORTH_FENCE))
+                            .setValue(WEST_FENCE, state.getValue(EAST_FENCE));
+            case COUNTER_CLOCKWISE_90:
+                return state.setValue(NORTH_FENCE, state.getValue(EAST_FENCE))
+                            .setValue(EAST_FENCE, state.getValue(SOUTH_FENCE))
+                            .setValue(SOUTH_FENCE, state.getValue(WEST_FENCE))
+                            .setValue(WEST_FENCE, state.getValue(NORTH_FENCE));
+            case CLOCKWISE_90:
+                return state.setValue(NORTH_FENCE, state.getValue(WEST_FENCE))
+                            .setValue(EAST_FENCE, state.getValue(NORTH_FENCE))
+                            .setValue(SOUTH_FENCE, state.getValue(EAST_FENCE))
+                            .setValue(WEST_FENCE, state.getValue(SOUTH_FENCE));
+            default:
+                return state;
+        }
+    }
+
+    @Override
+    public BlockState mirror(BlockState state, Mirror mirror) {
+        switch (mirror) {
+            case LEFT_RIGHT:
+                return state.setValue(NORTH_FENCE, state.getValue(SOUTH_FENCE))
+                            .setValue(SOUTH_FENCE, state.getValue(NORTH_FENCE));
+            case FRONT_BACK:
+                return state.setValue(EAST_FENCE, state.getValue(WEST_FENCE))
+                            .setValue(WEST_FENCE, state.getValue(EAST_FENCE));
+            default:
+                return super.mirror(state, mirror);
+        }
     }
 }

@@ -31,6 +31,9 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.Mirror;
+
 import javax.annotation.Nonnull;
 import java.util.List;
 
@@ -223,5 +226,25 @@ public class StairRailingBlock extends Block implements SimpleWaterloggedBlock {
     @Override
     protected void createBlockStateDefinition (StateDefinition.Builder<Block, BlockState> pBuilder) {
         pBuilder.add(FACING, LEFT_FENCE, RIGHT_FENCE, WATERLOGGED);
+    }
+    // --------------------------------------------------------
+    // Trying to fix rotations during worldgen structurs with these blocks
+    // --------------------------------------------------------
+
+    @Override
+    public BlockState rotate(BlockState state, Rotation rot) {
+        // Rotate structure in the direction that stairs face
+        return state.setValue(FACING, rot.rotate(state.getValue(FACING)));
+    }
+
+    @Override
+    public BlockState mirror(BlockState state, Mirror mirror) {
+        // Specchia la direzione (FACING)
+        Direction direction = state.getValue(FACING);
+        BlockState mirroredState = state.rotate(mirror.getRotation(direction));
+        
+        // If we mirror the structure, the left railing becomes the right one and vice versa.
+        return mirroredState.setValue(LEFT_FENCE, state.getValue(RIGHT_FENCE))
+                            .setValue(RIGHT_FENCE, state.getValue(LEFT_FENCE));
     }
 }
